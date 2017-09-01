@@ -1,0 +1,111 @@
+apply plugin: 'com.android.application'
+apply plugin: 'com.jakewharton.butterknife'
+apply plugin: 'android-aspectjx'
+apply plugin: 'com.neenbedankt.android-apt'
+
+android {
+    compileSdkVersion 25
+    buildToolsVersion '25.0.2'
+
+    packagingOptions {
+        exclude 'META-INF/DEPENDENCIES'
+        exclude 'META-INF/DEPENDENCIES.txt'
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/LICENSE.txt'
+        exclude 'META-INF/NOTICE'
+        exclude 'META-INF/NOTICE.txt'
+        exclude 'META-INF/notice.txt'
+        exclude 'META-INF/license.txt'
+        exclude 'META-INF/dependencies.txt'
+        exclude 'META-INF/LGPL2.1'
+        exclude 'META-INF/ASL2.0'
+        exclude 'META-INF/maven/com.squareup.okio/okio/pom.xml'
+        exclude 'META-INF/maven/com.squareup.okio/okio/pom.properties'
+    }
+
+    defaultConfig {
+        applicationId "com.test.statistics"
+        minSdkVersion 14
+        targetSdkVersion 22
+        versionCode 300
+        versionName "3.0.0"
+
+        //dex突破65535的限制
+        multiDexEnabled true
+        //默认是Umeng渠道
+        manifestPlaceholders = [UMENG_CHANNEL_VALUE: "channel_name"]
+
+        ndk {
+            abiFilters "armeabi", "armeabi-v7a"
+        }
+/*        ndk{
+            moduleName "JniUtils"             //生成的so名字
+            abiFilters "armeabi", "armeabi-v7a", "x86"  //输出指定三种abi体系结构下的so库。
+            cFlags "-DANDROID_NDK -D_DEBUG DNULL=0"   // Define some macros
+            ldLibs "EGL", "GLESv3", "dl", "log"       // Link with these libraries! 在这里添加你原先在makefile里ldlibs所链接的库
+            stl "stlport_shared"                      // Use shared stlport library
+        }*/
+//        jackOptions {
+//            enabled true
+//        }
+    }
+    //执行lint检查，有任何错误或者警告提示，都会终止构建，我们可以将其关掉
+    lintOptions {
+        abortOnError false
+    }
+
+
+    //签名
+    signingConfigs {
+        //debug模式的导出路径
+        debug {
+        }
+        release {
+        }
+    }
+
+    buildTypes {
+        release {
+
+            signingConfig signingConfigs.release
+            buildConfigField "boolean", "LOG_DEBUG", "false"
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+    dexOptions {
+        incremental true
+        javaMaxHeapSize "4g"
+        preDexLibraries false
+    }
+    sourceSets {
+        main {
+            jni.srcDirs = []
+            jniLibs.srcDirs = ['libs']
+        }
+
+    }
+    aspectjx {
+        //织入遍历符合条件的库
+        includeJarFilter ''
+    }
+    productFlavors {
+
+    }
+    productFlavors.all {
+        flavor -> flavor.manifestPlaceholders = [UMENG_CHANNEL_VALUE: name]
+    }
+
+
+}
+
+
+dependencies {
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+
+    compile 'com.android.support:support-v4:25.2.0'
+    compile 'com.android.support:appcompat-v7:25.2.0'
+    compile 'com.android.support:design:25.2.0'
+    compile 'com.android.support:multidex:1.0.0'
+
+}
+
